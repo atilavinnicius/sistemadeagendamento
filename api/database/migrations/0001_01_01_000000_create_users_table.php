@@ -14,9 +14,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('rg', 20)->unique();
+            $table->string('cpf', 14)->unique();
+            $table->unsignedTinyInteger('gender');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->date('date_birth');
+            $table->date('date_registration');
             $table->string('password');
+            $table->string('role');
             $table->rememberToken();
             $table->timestamps();
         });
