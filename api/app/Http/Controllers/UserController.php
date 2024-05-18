@@ -39,7 +39,7 @@ class UserController extends Controller
             return response()->json($user, 201);
         } catch (QueryException $e) {
             // Se ocorrer um erro de consulta, provavelmente devido a restrições de chave estrangeira ou outros problemas de integridade de dados
-            return response()->json(['error' => 'Erro ao salvar dados. Por favor, tente novamente mais tarde.'], 500);
+            return response()->json(['error' => 'Erro ao salvar dados.','erro' => $e->getMessage()], 500);
         } catch (\Exception $e) {
             // Captura qualquer outra exceção não tratada
             return response()->json(['error' => $e->getMessage()], 500);
