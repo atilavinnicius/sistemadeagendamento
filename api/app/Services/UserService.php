@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Models\Profile_photo;
 use App\Models\Telephone;
 use App\Models\User;
+use Exception;
 
 class UserService
 {

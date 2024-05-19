@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Requests;
 
 use App\Enums\RolesEnum;
@@ -36,23 +35,20 @@ class UserRequest extends FormRequest
             'password' => 'required',
             'role' => 'required|in:' . implode(',', RolesEnum::getValues()),
 
-            //Valitation geral
-            'user_id' => 'required|exists:users,id',
-
             //Validation Address
             'zip_code' => 'required|string|max:10',
             'address' => 'required|string|max:255',
             'number' => 'required|string|max:10',
             'neighborhood' => 'required|string|max:100',
             'city' => 'required|string|max:100',
+            'state' => 'required|string|max:2',
             'complement' => 'nullable|string|max:255',
 
             //Validation Telephones
             'telephone' => 'required',
 
-            //Validation Profile Photos
-            'path' => 'required|string|max:255',
-
+            // Validation Profile Photo
+            'profile_photo' => 'required|image|mimes:png|max:2048', // Adiciona validação para imagem PNG e tamanho máximo de 2MB
         ];
     }
 
@@ -81,12 +77,6 @@ class UserRequest extends FormRequest
             'role.required' => 'O papel é obrigatório.',
             'role.in' => 'O papel deve ser um dos seguintes valores: admin, client.',
 
-
-
-            // Validation geral
-            'user_id.required' => 'O ID do usuário é obrigatório.',
-            'user_id.exists' => 'O ID do usuário fornecido não existe.',
-
             // Validation Address
             'zip_code.required' => 'O CEP é obrigatório.',
             'zip_code.string' => 'O CEP deve ser uma string.',
@@ -103,16 +93,20 @@ class UserRequest extends FormRequest
             'city.required' => 'A cidade é obrigatória.',
             'city.string' => 'A cidade deve ser uma string.',
             'city.max' => 'A cidade não pode ter mais que 100 caracteres.',
+            'state.required' => 'O Estado é obrigatório.',
+            'state.string' => 'O Estado deve ser uma string.',
+            'state.max' => 'O Estado não pode ter mais que 2 caracteres.',
             'complement.string' => 'O complemento deve ser uma string.',
             'complement.max' => 'O complemento não pode ter mais que 255 caracteres.',
 
             // Validation Telephones
             'telephone.required' => 'O telefone é obrigatório.',
 
-            // Validation Profile Photos
-            'path.required' => 'O caminho do arquivo é obrigatório.',
-            'path.string' => 'O caminho do arquivo deve ser uma string.',
-            'path.max' => 'O caminho do arquivo não pode ter mais que 255 caracteres.',
+            // Validation Profile Photo
+            'profile_photo.required' => 'A foto de perfil é obrigatória.',
+            'profile_photo.image' => 'A foto de perfil deve ser uma imagem.',
+            'profile_photo.mimes' => 'A foto de perfil deve ser um arquivo do tipo PNG.',
+            'profile_photo.max' => 'A foto de perfil não pode ter mais que 2MB.',
         ];
     }
 
@@ -123,6 +117,4 @@ class UserRequest extends FormRequest
             'errors' => $validator->errors()
         ], 422));
     }
-
-
 }

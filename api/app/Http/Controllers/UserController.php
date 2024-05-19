@@ -6,6 +6,7 @@ use App\Http\Requests\UserRequest;
 use App\Services\UserService as ServicesUserService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -19,29 +20,41 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         try {
+            DB::beginTransaction();
+
             $userData = $request->validated();
 
             // Salvar usuário
             $user = $this->userService->createUser($userData);
+            $userId = $user->id;
 
             // Salvar endereço do usuário
-            $addressData = $request->only(['address', 'city', 'state', 'zipcode']);
+            $addressData = $request->only(['address', 'number', 'neighborhood', 'complement' ,'city', 'state', 'zip_code']);
+            $addressData['user_id'] = $userId;
+
             $this->userService->createAddress($addressData);
 
             // Salvar telefone do usuário
             $telephoneData = $request->only(['telephone']);
+            $telephoneData['user_id'] = $userId;
             $this->userService->createTelephone($telephoneData);
 
-            // Salvar foto do perfil do usuário
-            $profilePhotoData = $request->only(['profile_photo']);
+            // Processar o upload da foto de perfil
+            $file = $request->file('profile_photo');
+            $path = $file->store('profile_photos', 'public');
+
+            // Adicionar o user_id e o path aos dados da foto de perfil
+            $profilePhotoData = ['user_id' => $userId, 'path' => $path];
             $this->userService->saveProfilePhoto($profilePhotoData);
 
+
+            DB::commit();
             return response()->json($user, 201);
         } catch (QueryException $e) {
-            // Se ocorrer um erro de consulta, provavelmente devido a restrições de chave estrangeira ou outros problemas de integridade de dados
+            DB::rollBack();
             return response()->json(['error' => 'Erro ao salvar dados.','erro' => $e->getMessage()], 500);
         } catch (\Exception $e) {
-            // Captura qualquer outra exceção não tratada
+            DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
