@@ -23,13 +23,13 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             // Validation User
             'name' => 'required|max:255',
             'rg' => 'required|max:20',
             'cpf' => 'required|max:14',
             'gender' => 'required|integer|between:0,1',
-            'email' => 'required|unique:users',
+            'email' => 'required',
             'date_birth' => 'required|date|before:today',
             'date_registration' => 'required|date|date_equals:today',
             'password' => 'required',
@@ -45,11 +45,20 @@ class UserRequest extends FormRequest
             'complement' => 'nullable|string|max:255',
 
             //Validation Telephones
-            'telephone' => 'required',
+            'telephones' => 'required|array|min:1',
+            'telephones.*' => 'required|string|max:20',
 
             // Validation Profile Photo
-            'profile_photo' => 'required|image|mimes:png|max:2048', // Adiciona validação para imagem PNG e tamanho máximo de 2MB
         ];
+
+        if ($this->isMethod('post')) {
+            $rules['rg'] .= '|unique:users';
+            $rules['cpf'] .= '|unique:users';
+            $rules['email'] .= '|unique:users';
+            $rules['profile_photo'] = 'required|image|mimes:png|max:2048'; // Adiciona validação para imagem PNG e tamanho máximo de 2MB
+        }
+
+        return $rules;
     }
 
     public function messages(): array
@@ -60,8 +69,10 @@ class UserRequest extends FormRequest
             'name.max' => 'O nome não pode ter mais que 255 caracteres.',
             'rg.required' => 'O RG é obrigatório.',
             'rg.max' => 'O RG não pode ter mais que 20 caracteres.',
+            'rg.unique' => 'Este RG já está em uso.',
             'cpf.required' => 'O CPF é obrigatório.',
             'cpf.max' => 'O CPF não pode ter mais que 14 caracteres.',
+            'cpf.unique' => 'Este CPF já está em uso.',
             'gender.required' => 'O gênero é obrigatório.',
             'gender.integer' => 'O gênero deve ser um número inteiro.',
             'gender.between' => 'O gênero deve ser 0 (masculino) ou 1 (feminino).',
@@ -100,7 +111,12 @@ class UserRequest extends FormRequest
             'complement.max' => 'O complemento não pode ter mais que 255 caracteres.',
 
             // Validation Telephones
-            'telephone.required' => 'O telefone é obrigatório.',
+            'telephones.required' => 'É necessário fornecer pelo menos um telefone.',
+            'telephones.array' => 'Os telefones devem estar em um array.',
+            'telephones.min' => 'É necessário fornecer pelo menos um telefone.',
+            'telephones.*.required' => 'O número do telefone é obrigatório.',
+            'telephones.*.string' => 'O número do telefone deve ser uma string.',
+            'telephones.*.max' => 'O número do telefone não pode ter mais que 20 caracteres.',
 
             // Validation Profile Photo
             'profile_photo.required' => 'A foto de perfil é obrigatória.',
