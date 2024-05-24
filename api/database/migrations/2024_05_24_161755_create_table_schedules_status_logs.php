@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('schedules_status_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('schedule_id')->constrained('service_appointments');
+            $table->foreignId('schedule_id')->constrained('service_schedules');
             $table->string('description');
             $table->foreignId('user_id')->constrained('users');
             $table->boolean('notify_client')->default(false);
