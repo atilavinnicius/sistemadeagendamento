@@ -3,96 +3,76 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ServiceRequest;
-use App\Models\Service;
-use App\Models\ServicePhoto;
-use App\Models\ServicePhotoPerfil;
+use App\Services\ServiceService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
+    protected $serviceService;
+
+    public function __construct(ServiceService $serviceService)
+    {
+        $this->serviceService = $serviceService;
+    }
+
     public function index()
     {
-        $services = Service::with(['photos', 'perfilPhoto'])->get();
-        return response()->json($services);
+        try {
+            $services = $this->serviceService->getAllServices();
+            return response()->json($services);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erro ao buscar serviços.', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function store(ServiceRequest $request)
     {
-        $service = Service::create($request->validated());
-
-        if ($request->has('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('public/services');
-                ServicePhoto::create([
-                    'service_id' => $service->id,
-                    'path' => $path,
-                ]);
-            }
+        try {
+            $service = $this->serviceService->createService($request->validated());
+            return response()->json($service, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        if ($request->has('perfil_photo')) {
-            $path = $request->file('perfil_photo')->store('public/services/perfil');
-            ServicePhotoPerfil::create([
-                'service_id' => $service->id,
-                'path' => $path,
-            ]);
-        }
-
-        return response()->json($service->load(['photos', 'perfilPhoto']), 201);
     }
 
-    public function show(Service $service)
+    public function show($id)
     {
-        return response()->json($service->load(['photos', 'perfilPhoto']));
+        try {
+            $service = $this->serviceService->getServiceById($id);
+            if (!$service) {
+                return response()->json(['error' => 'Serviço não encontrado.'], 404);
+            }
+            return response()->json($service);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erro ao buscar serviço.'], 500);
+        }
     }
 
-    public function update(ServiceRequest $request, Service $service)
+    public function update(ServiceRequest $request, $id)
     {
-        $service->update($request->validated());
+        try {
+            $service = $this->serviceService->getServiceById($id);
 
-        if ($request->has('photos')) {
-            foreach ($service->photos as $photo) {
-                Storage::delete($photo->path);
-                $photo->delete();
+            if (!$service) {
+                return response()->json(['error' => 'Service not found.'], 404);
             }
 
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('public/services');
-                ServicePhoto::create([
-                    'service_id' => $service->id,
-                    'path' => $path,
-                ]);
-            }
+            $this->serviceService->updateService($service, $request->validated());
+
+            return response()->json($service);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        if ($request->has('perfil_photo')) {
-            if ($service->perfilPhoto) {
-                Storage::delete($service->perfilPhoto->path);
-                $service->perfilPhoto->delete();
-            }
-
-            $path = $request->file('perfil_photo')->store('public/services/perfil');
-            ServicePhotoPerfil::create([
-                'service_id' => $service->id,
-                'path' => $path,
-            ]);
-        }
-
-        return response()->json($service->load(['photos', 'perfilPhoto']));
     }
 
-    public function destroy(Service $service)
+
+    public function destroy($id)
     {
-        foreach ($service->photos as $photo) {
-            Storage::delete($photo->path);
+        try {
+            $this->serviceService->deleteService($id);
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        if ($service->perfilPhoto) {
-            Storage::delete($service->perfilPhoto->path);
-        }
-
-        $service->delete();
-        return response()->json(null, 204);
     }
 }

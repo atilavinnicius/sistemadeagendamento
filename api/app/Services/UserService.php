@@ -47,6 +47,9 @@ class UserService
         if (!$user) {
             throw new Exception('User not found.');
         }
+        $user->address()->delete();
+        $user->profilePhoto()->delete();
+        $user->telephones()->delete();
         $user->delete();
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('service_schedules', function (Blueprint $table) {
             $table->id();
             $table->dateTime('date_time');
-            $table->foreignId('client_id')->constrained('users');
+            $table->foreignId('client_id')->nullable()->constrained('users')->onDelete('set null');
             $table->enum('status', ['aguardando_aceitacao', 'rejeitado', 'cancelado', 'aceito', 'concluido']);
             $table->foreignId('service_id')->constrained('services');
             $table->timestamps();

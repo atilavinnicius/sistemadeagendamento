@@ -55,7 +55,7 @@ class UserRequest extends FormRequest
             $rules['rg'] .= '|unique:users';
             $rules['cpf'] .= '|unique:users';
             $rules['email'] .= '|unique:users';
-            $rules['profile_photo'] = 'required|image|mimes:png|max:2048'; // Adiciona validação para imagem PNG e tamanho máximo de 2MB
+            $rules['profile_photo'] = 'required|image|mimes:png, jpg, jpeg|max:2048'; // Adiciona validação para imagem PNG e tamanho máximo de 2MB
         }
 
         return $rules;

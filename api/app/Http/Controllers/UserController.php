@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
+use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class UserController extends Controller
             $users = $this->userService->getAllUsers();
             return response()->json($users);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao buscar usuários.'], 500);
+            return response()->json(['error' => 'Erro ao buscar usuários.', 'message' => $e->getMessage()], 500);
         }
     }
 

@@ -23,15 +23,18 @@ class ServiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'photos' => 'required|array|min:1',
-            'photos.*' => 'image|mimes:jpeg,png,jpg|max:2048',
-            'perfil_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ];
+        if ($this->isMethod('post')) {
+            $rules['photos'] = 'required|array|min:1';
+            $rules['photos.*'] = 'image|mimes:jpeg,png,jpg|max:2048';
+            $rules['perfil_photo'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
+        }
+        return $rules;
     }
 
     public function messages()
